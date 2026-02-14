@@ -3,48 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jon's Assistant — Setup</title>
+  <title>Jon's Assistant</title>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-primary: #0f1117;
-      --bg-secondary: #1a1d27;
-      --bg-input: #232733;
+      --bg: #0f1117;
+      --bg2: #1a1d27;
+      --bg3: #232733;
       --accent: #f59e0b;
-      --accent-dim: rgba(245, 158, 11, 0.15);
-      --text-primary: #e8eaed;
-      --text-secondary: #9ca3af;
-      --text-muted: #6b7280;
+      --accent-dim: rgba(245,158,11,0.15);
+      --text: #e8eaed;
+      --text2: #9ca3af;
+      --muted: #6b7280;
       --border: #2d3140;
-      --success: #22c55e;
-      --success-dim: rgba(34, 197, 94, 0.15);
-      --error: #ef4444;
+      --blue: #2563eb;
+      --green: #22c55e;
     }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
       font-family: 'DM Sans', sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      min-height: 100vh;
-      padding: 40px 20px;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
-    .container {
-      max-width: 640px;
-      margin: 0 auto;
+    /* Setup Screen */
+    .setup {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      padding: 20px;
     }
-
-    /* Header */
-    .header {
+    .setup-box {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 440px;
       text-align: center;
-      margin-bottom: 40px;
     }
-
-    .logo {
-      width: 56px;
-      height: 56px;
+    .setup-box .logo {
+      width: 56px; height: 56px;
       background: var(--accent);
       border-radius: 14px;
       display: inline-flex;
@@ -53,506 +56,499 @@
       font-family: 'JetBrains Mono', monospace;
       font-weight: 600;
       font-size: 22px;
-      color: var(--bg-primary);
-      margin-bottom: 16px;
+      color: var(--bg);
+      margin-bottom: 20px;
     }
-
-    .header h1 {
-      font-size: 24px;
-      margin-bottom: 6px;
-    }
-
-    .header p {
-      color: var(--text-secondary);
-      font-size: 14px;
-    }
-
-    /* Steps */
-    .step {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 16px;
-      transition: border-color 0.3s;
-    }
-
-    .step.active {
-      border-color: var(--accent);
-    }
-
-    .step.complete {
-      border-color: var(--success);
-    }
-
-    .step-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .step-number {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--accent-dim);
-      color: var(--accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: 600;
-      font-size: 14px;
-      flex-shrink: 0;
-    }
-
-    .step.complete .step-number {
-      background: var(--success-dim);
-      color: var(--success);
-    }
-
-    .step-title {
-      font-weight: 600;
-      font-size: 16px;
-    }
-
-    .step-desc {
-      color: var(--text-secondary);
-      font-size: 14px;
-      line-height: 1.6;
-      margin-bottom: 16px;
-    }
-
-    .step-desc a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-
-    .step-desc a:hover {
-      text-decoration: underline;
-    }
-
-    /* Form Fields */
-    label {
-      display: block;
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-bottom: 6px;
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    input[type="text"],
-    input[type="password"],
-    input[type="number"],
-    textarea {
+    .setup-box h1 { font-size: 22px; margin-bottom: 6px; }
+    .setup-box p { color: var(--text2); font-size: 14px; margin-bottom: 24px; line-height: 1.5; }
+    .setup-box input {
       width: 100%;
-      background: var(--bg-input);
+      background: var(--bg3);
       border: 1px solid var(--border);
-      color: var(--text-primary);
-      padding: 12px 14px;
-      border-radius: 8px;
+      color: var(--text);
+      padding: 14px 16px;
+      border-radius: 10px;
       font-family: 'JetBrains Mono', monospace;
       font-size: 14px;
       outline: none;
+      margin-bottom: 16px;
       transition: border-color 0.2s;
-      margin-bottom: 12px;
     }
-
-    input:focus, textarea:focus {
-      border-color: var(--accent);
-    }
-
-    input::placeholder, textarea::placeholder {
-      color: var(--text-muted);
-    }
-
-    .field-hint {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: -8px;
-      margin-bottom: 12px;
-    }
-
-    .toggle-vis {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-      padding: 4px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 11px;
-      font-family: 'JetBrains Mono', monospace;
-      float: right;
-      margin-top: -4px;
-    }
-
-    .toggle-vis:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    /* Buttons */
-    .btn {
+    .setup-box input:focus { border-color: var(--accent); }
+    .setup-box input::placeholder { color: var(--muted); }
+    .setup-box button {
+      width: 100%;
       background: var(--accent);
       border: none;
-      color: var(--bg-primary);
-      padding: 12px 24px;
-      border-radius: 8px;
-      cursor: pointer;
+      color: var(--bg);
+      padding: 14px;
+      border-radius: 10px;
       font-family: 'DM Sans', sans-serif;
       font-weight: 600;
-      font-size: 14px;
-      transition: all 0.2s;
-      width: 100%;
-    }
-
-    .btn:hover {
-      background: #d97706;
-    }
-
-    .btn-secondary {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-    }
-
-    .btn-secondary:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: var(--accent-dim);
-    }
-
-    .btn-success {
-      background: var(--success);
-    }
-
-    .btn-success:hover {
-      background: #16a34a;
-    }
-
-    /* Output */
-    .output-box {
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 16px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      line-height: 1.6;
-      white-space: pre-wrap;
-      word-break: break-all;
-      margin-bottom: 12px;
-      position: relative;
-    }
-
-    .copy-btn {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-      padding: 4px 10px;
-      border-radius: 4px;
+      font-size: 15px;
       cursor: pointer;
+      transition: background 0.2s;
+    }
+    .setup-box button:hover { background: #d97706; }
+    .setup-box .hint {
       font-size: 11px;
+      color: var(--muted);
+      margin-top: 16px;
       font-family: 'JetBrains Mono', monospace;
-      transition: all 0.2s;
+      line-height: 1.5;
     }
+    .setup-box .hint a { color: var(--accent); text-decoration: none; }
+    .setup-box .err { color: #ef4444; font-size: 13px; margin-bottom: 12px; }
 
-    .copy-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
+    /* Chat Screen */
+    .chat { display: none; flex-direction: column; height: 100vh; }
+    .chat.show { display: flex; }
+    .setup.hide { display: none; }
 
-    .copy-btn.copied {
-      border-color: var(--success);
-      color: var(--success);
-    }
-
-    /* Validation */
-    .valid { border-color: var(--success) !important; }
-    .invalid { border-color: var(--error) !important; }
-
-    .validation-msg {
-      font-size: 12px;
-      margin-top: -8px;
-      margin-bottom: 12px;
-    }
-
-    .validation-msg.ok { color: var(--success); }
-    .validation-msg.err { color: var(--error); }
-
-    /* Checklist */
-    .checklist {
-      list-style: none;
-      margin: 12px 0;
-    }
-
-    .checklist li {
-      padding: 8px 0;
-      font-size: 14px;
-      color: var(--text-secondary);
+    header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 10px;
+      background: var(--bg2);
+      flex-shrink: 0;
     }
-
-    .checklist li .check {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      border: 2px solid var(--border);
+    .h-left { display: flex; align-items: center; gap: 10px; }
+    .h-logo {
+      width: 34px; height: 34px;
+      background: var(--accent);
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
-      font-size: 12px;
-    }
-
-    .checklist li.done .check {
-      border-color: var(--success);
-      background: var(--success-dim);
-      color: var(--success);
-    }
-
-    .checklist li.done {
-      color: var(--text-primary);
-    }
-
-    /* Terminal commands */
-    .terminal {
-      background: #000;
-      border-radius: 8px;
-      padding: 16px;
       font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--bg);
+    }
+    .h-title { font-weight: 600; font-size: 16px; }
+    .h-sub { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+    .h-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text2);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+    }
+    .h-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    #messages::-webkit-scrollbar { width: 5px; }
+    #messages::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+
+    .msg {
+      display: flex;
+      gap: 10px;
+      max-width: 80%;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .msg.u { align-self: flex-end; flex-direction: row-reverse; }
+    .avatar {
+      width: 30px; height: 30px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 13px;
-      color: #22c55e;
-      margin: 12px 0;
-      position: relative;
+      flex-shrink: 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+    }
+    .msg.u .avatar { background: var(--blue); color: white; }
+    .msg.a .avatar { background: var(--accent-dim); color: var(--accent); }
+    .bubble {
+      padding: 11px 15px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .msg.u .bubble { background: var(--blue); color: white; border-bottom-right-radius: 4px; }
+    .msg.a .bubble { background: var(--bg2); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+
+    .welcome {
+      text-align: center;
+      padding: 50px 20px;
+      color: var(--text2);
+    }
+    .welcome-icon {
+      width: 56px; height: 56px;
+      background: var(--accent-dim);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 24px;
+    }
+    .welcome h2 { color: var(--text); font-size: 20px; margin-bottom: 6px; }
+    .welcome p { font-size: 14px; max-width: 380px; margin: 0 auto; }
+    .qa {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+    .qa button {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      color: var(--text2);
+      padding: 7px 13px;
+      border-radius: 18px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .qa button:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+    .typing { display: flex; gap: 4px; padding: 4px 0; }
+    .typing span {
+      width: 5px; height: 5px;
+      background: var(--muted);
+      border-radius: 50%;
+      animation: b 1.4s infinite ease-in-out;
+    }
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes b {
+      0%,80%,100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
     }
 
-    .terminal .prompt { color: var(--accent); }
-    .terminal .cmd { color: var(--text-primary); }
-
-    .hidden { display: none; }
+    .input-area {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      background: var(--bg2);
+      flex-shrink: 0;
+    }
+    .input-wrap { display: flex; gap: 10px; align-items: flex-end; }
+    #userInput {
+      flex: 1;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      resize: none;
+      min-height: 44px;
+      max-height: 140px;
+      line-height: 1.5;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #userInput:focus { border-color: var(--accent); }
+    #userInput::placeholder { color: var(--muted); }
+    #sendBtn {
+      background: var(--accent);
+      border: none;
+      color: var(--bg);
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    #sendBtn:hover { background: #d97706; }
+    #sendBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+    #sendBtn svg { width: 18px; height: 18px; }
+    .input-hint {
+      text-align: center;
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 6px;
+      font-family: 'JetBrains Mono', monospace;
+    }
 
     @media (max-width: 600px) {
-      body { padding: 20px 12px; }
-      .step { padding: 18px; }
+      .msg { max-width: 92%; }
+      .setup-box { padding: 28px 20px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
+
+  <!-- SETUP: Just paste your key -->
+  <div class="setup" id="setupScreen">
+    <div class="setup-box">
       <div class="logo">JA</div>
-      <h1>Jon's Assistant — Setup</h1>
-      <p>Fill in the fields below, then follow the steps to get running</p>
+      <h1>Jon's Assistant</h1>
+      <p>Paste your Claude API key to start chatting.</p>
+      <div class="err" id="setupErr" style="display:none;"></div>
+      <input type="password" id="keyInput" placeholder="sk-ant-api03-..." autofocus>
+      <button onclick="startChat()">Start Chatting</button>
+      <div class="hint">
+        🔒 Key stays in your browser. Never sent anywhere except Anthropic.<br>
+        Get a key at <a href="https://console.anthropic.com/settings/keys" target="_blank">console.anthropic.com</a>
+      </div>
     </div>
+  </div>
 
-    <!-- Step 1: API Key -->
-    <div class="step active" id="step1">
-      <div class="step-header">
-        <div class="step-number">1</div>
-        <div class="step-title">Claude API Key</div>
-      </div>
-      <div class="step-desc">
-        Get your key from <a href="https://console.anthropic.com/settings/keys" target="_blank">console.anthropic.com/settings/keys</a>. Click "Create Key", give it a name, and paste it below.
-      </div>
-      <label>
-        API Key
-        <button class="toggle-vis" onclick="toggleKeyVis()">show/hide</button>
-      </label>
-      <input type="password" id="apiKey" placeholder="sk-ant-api03-..." oninput="validateKey()">
-      <div id="keyValidation" class="validation-msg hidden"></div>
-    </div>
-
-    <!-- Step 2: Settings -->
-    <div class="step" id="step2">
-      <div class="step-header">
-        <div class="step-number">2</div>
-        <div class="step-title">Settings (optional)</div>
-      </div>
-      <div class="step-desc">
-        Defaults work fine — only change these if you know what you're doing.
-      </div>
-      <label>Port number</label>
-      <input type="number" id="port" value="3000" min="1024" max="65535">
-      <div class="field-hint">Default is 3000. Change if something else uses that port.</div>
-
-      <label>Model</label>
-      <input type="text" id="model" value="claude-sonnet-4-20250514">
-      <div class="field-hint">claude-sonnet-4-20250514 (fast+cheap) or claude-opus-4-20250514 (smarter+pricier)</div>
-    </div>
-
-    <!-- Step 3: Generate -->
-    <div class="step" id="step3">
-      <div class="step-header">
-        <div class="step-number">3</div>
-        <div class="step-title">Generate your .env file</div>
-      </div>
-      <div class="step-desc">
-        Click the button to generate your config. Then copy the contents into a new file called <strong>.env</strong> in your project folder.
-      </div>
-      <button class="btn" onclick="generateEnv()">Generate .env contents</button>
-      <div id="envOutput" class="hidden" style="margin-top: 16px;">
-        <div class="output-box" id="envContents">
-          <button class="copy-btn" onclick="copyEnv()">copy</button>
+  <!-- CHAT -->
+  <div class="chat" id="chatScreen">
+    <header>
+      <div class="h-left">
+        <div class="h-logo">JA</div>
+        <div>
+          <div class="h-title">Jon's Assistant</div>
+          <div class="h-sub">personal project brain</div>
         </div>
-        <div class="step-desc" style="margin-bottom: 0;">
-          <strong>How to create the file:</strong><br>
-          1. Open Notepad<br>
-          2. Paste the contents above<br>
-          3. File → Save As → navigate to your <code>jon-assistant</code> folder<br>
-          4. Set "Save as type" to <strong>All Files (*.*)</strong><br>
-          5. Name the file exactly: <strong>.env</strong><br>
-          6. Click Save
+      </div>
+      <div>
+        <button class="h-btn" onclick="clearChat()">Clear</button>
+        <button class="h-btn" onclick="logout()" style="margin-left:6px;">Logout</button>
+      </div>
+    </header>
+
+    <div id="messages">
+      <div class="welcome" id="welcome">
+        <div class="welcome-icon">🔧</div>
+        <h2>G'day Jon</h2>
+        <p>Your personal project assistant. Ask me anything about your repos, MVP, roadmap, or ideas.</p>
+        <div class="qa">
+          <button onclick="q('What should I focus on this week for itabs-quotes?')">Weekly focus</button>
+          <button onclick="q('What are my parked ideas?')">Parked ideas</button>
+          <button onclick="q('Remind me about the Will Webster connection')">Will Webster</button>
+          <button onclick="q('Help me plan next steps for getting tradies using the widget')">Next steps</button>
         </div>
       </div>
     </div>
 
-    <!-- Step 4: Run -->
-    <div class="step" id="step4">
-      <div class="step-header">
-        <div class="step-number">4</div>
-        <div class="step-title">Install and Run</div>
+    <div class="input-area">
+      <div class="input-wrap">
+        <textarea id="userInput" placeholder="Ask me anything..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send()}" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,140)+'px'"></textarea>
+        <button id="sendBtn" onclick="send()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
       </div>
-      <div class="step-desc">
-        Make sure you have <a href="https://nodejs.org" target="_blank">Node.js</a> installed (LTS version). Then open a terminal in your project folder and run:
-      </div>
-      <div class="terminal">
-        <div><span class="prompt">></span> <span class="cmd">npm install</span></div>
-        <div style="margin-top: 8px;"><span class="prompt">></span> <span class="cmd">npm start</span></div>
-      </div>
-      <div class="step-desc">
-        <strong>To open a terminal in your folder:</strong> Open File Explorer, navigate to <code>jon-assistant</code>, click the address bar, type <strong>cmd</strong> and hit Enter.
-      </div>
-    </div>
-
-    <!-- Step 5: Verify -->
-    <div class="step" id="step5">
-      <div class="step-header">
-        <div class="step-number">5</div>
-        <div class="step-title">Verify it works</div>
-      </div>
-      <div class="step-desc" id="openLink">
-        Open <a href="http://localhost:3000" target="_blank">http://localhost:3000</a> in your browser. You should see the chat interface.
-      </div>
-      <ul class="checklist">
-        <li id="check1"><span class="check"></span> Downloaded all project files</li>
-        <li id="check2"><span class="check"></span> Created .env with API key</li>
-        <li id="check3"><span class="check"></span> Ran npm install</li>
-        <li id="check4"><span class="check"></span> Ran npm start</li>
-        <li id="check5"><span class="check"></span> Chat loads in browser</li>
-      </ul>
-      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <button class="btn-secondary btn" style="flex:1; min-width: 120px;" onclick="toggleCheck(1)">✓ Files ready</button>
-        <button class="btn-secondary btn" style="flex:1; min-width: 120px;" onclick="toggleCheck(2)">✓ .env done</button>
-        <button class="btn-secondary btn" style="flex:1; min-width: 120px;" onclick="toggleCheck(3)">✓ Installed</button>
-        <button class="btn-secondary btn" style="flex:1; min-width: 120px;" onclick="toggleCheck(4)">✓ Running</button>
-        <button class="btn-secondary btn" style="flex:1; min-width: 120px;" onclick="toggleCheck(5)">✓ It works!</button>
-      </div>
-    </div>
-
-    <!-- Security reminder -->
-    <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 12px; font-family: 'JetBrains Mono', monospace;">
-      🔒 Your API key stays on your machine. Never share it in chats, emails, or commit it to GitHub.
+      <div class="input-hint">Enter to send · Shift+Enter for new line</div>
     </div>
   </div>
 
   <script>
-    function validateKey() {
-      const key = document.getElementById('apiKey').value.trim();
-      const msg = document.getElementById('keyValidation');
-      const input = document.getElementById('apiKey');
+    let API_KEY = '';
+    let history = [];
+
+    const SYSTEM = `You are Jon's personal project assistant. You know his projects, goals, and context inside out. Be direct, practical, and no-nonsense — like talking to a smart mate who gets it.
+
+## About Jon
+- 50-year-old boilermaker working in mining in Perth, Australia
+- Self-taught "vibe coder" who builds web apps with AI assistance
+- GitHub: boilermaker-innovator (240+ repositories)
+- Previous startup experience with covercard.com.au
+- Describes himself as "the idea guy"
+
+## Current MVP Focus: itabs-quotes
+- Config-driven interactive quote estimator widget for Australian trades market
+- Differentiates through contextual education
+- Live at: boilermaker-innovator.github.io/itabs-quotes/
+- Universal engine that reads config objects and renders accordion sections with live pricing
+- Demonstrated to Will Webster from Cohezion at a tech meetup — received positive interest
+- Current goal: Get real tradies using the widget, then return to Will with proven traction
+
+## The iTabs Ecosystem
+- iTabs = AI-powered interactive content widget system
+- Flexible framework: donation widgets, study guides, content explainers, quote estimators
+- iTabs Generator: transforms YouTube videos into interactive HTML guides with "i" buttons
+- Study tools for White Card and RSA certifications (targeting backpackers and FIFO workers)
+- Workplace safety guides following Jon's drill grab injury
+
+## Key Contacts
+- Will Webster (Cohezion) — showed portfolio iTabs at tech meetup, positive response
+- Dylan (Gateworld Perth) — collaborated on gate widget, hasn't responded, not needed for MVP
+
+## Parked Ideas
+1. Planner app for idea guys who struggle to execute
+2. Crowdfunding planner MVP
+3. iTabs Twitter outreach tool
+4. Gobot / always-on AI assistant for business tasks
+5. SKILL.md generator tool for itabs.ai
+
+## How to Help Jon
+- Keep responses practical and actionable
+- He prefers complete working files over code fragments
+- Minimal decision-making overhead — give recommendations not 10 options
+- Remind him to stay focused on itabs-quotes MVP when he drifts
+- Be honest about what's worth pursuing vs what should stay parked`;
+
+    // Check for saved key
+    const saved = sessionStorage.getItem('ja_key');
+    if (saved) {
+      API_KEY = saved;
+      document.getElementById('setupScreen').classList.add('hide');
+      document.getElementById('chatScreen').classList.add('show');
+    }
+
+    function startChat() {
+      const key = document.getElementById('keyInput').value.trim();
+      const err = document.getElementById('setupErr');
 
       if (!key) {
-        msg.classList.add('hidden');
-        input.classList.remove('valid', 'invalid');
+        err.textContent = 'Please paste your API key';
+        err.style.display = 'block';
+        return;
+      }
+      if (!key.startsWith('sk-ant-')) {
+        err.textContent = 'Key should start with sk-ant-';
+        err.style.display = 'block';
         return;
       }
 
-      msg.classList.remove('hidden');
+      API_KEY = key;
+      sessionStorage.setItem('ja_key', key);
+      document.getElementById('setupScreen').classList.add('hide');
+      document.getElementById('chatScreen').classList.add('show');
+      document.getElementById('userInput').focus();
+    }
 
-      if (key.startsWith('sk-ant-')) {
-        msg.textContent = '✓ Looks like a valid Anthropic key';
-        msg.className = 'validation-msg ok';
-        input.classList.add('valid');
-        input.classList.remove('invalid');
-        document.getElementById('step1').classList.add('complete');
-      } else {
-        msg.textContent = '✗ Key should start with sk-ant-';
-        msg.className = 'validation-msg err';
-        input.classList.add('invalid');
-        input.classList.remove('valid');
-        document.getElementById('step1').classList.remove('complete');
+    // Allow Enter on key input
+    document.getElementById('keyInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') startChat();
+    });
+
+    function q(text) {
+      document.getElementById('userInput').value = text;
+      send();
+    }
+
+    function addMsg(role, text) {
+      const w = document.getElementById('welcome');
+      if (w) w.style.display = 'none';
+      const m = document.getElementById('messages');
+      const cls = role === 'user' ? 'u' : 'a';
+      const label = role === 'user' ? 'J' : 'AI';
+      const div = document.createElement('div');
+      div.className = `msg ${cls}`;
+      div.innerHTML = `<div class="avatar">${label}</div><div class="bubble"></div>`;
+      div.querySelector('.bubble').textContent = text;
+      m.appendChild(div);
+      m.scrollTop = m.scrollHeight;
+      return div;
+    }
+
+    function showTyping() {
+      const w = document.getElementById('welcome');
+      if (w) w.style.display = 'none';
+      const m = document.getElementById('messages');
+      const div = document.createElement('div');
+      div.className = 'msg a';
+      div.id = 'typing';
+      div.innerHTML = `<div class="avatar">AI</div><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+      m.appendChild(div);
+      m.scrollTop = m.scrollHeight;
+    }
+
+    function hideTyping() {
+      const t = document.getElementById('typing');
+      if (t) t.remove();
+    }
+
+    async function send() {
+      const input = document.getElementById('userInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      input.value = '';
+      input.style.height = 'auto';
+      document.getElementById('sendBtn').disabled = true;
+
+      addMsg('user', text);
+      history.push({ role: 'user', content: text });
+      showTyping();
+
+      try {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': API_KEY,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true'
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 4096,
+            system: SYSTEM,
+            messages: history.slice(-40)
+          })
+        });
+
+        hideTyping();
+
+        if (!res.ok) {
+          const err = await res.json();
+          addMsg('assistant', `Error: ${err.error?.message || res.statusText}`);
+        } else {
+          const data = await res.json();
+          const reply = data.content[0]?.text || 'No response';
+          history.push({ role: 'assistant', content: reply });
+          addMsg('assistant', reply);
+        }
+      } catch (err) {
+        hideTyping();
+        addMsg('assistant', `Connection error: ${err.message}`);
       }
+
+      document.getElementById('sendBtn').disabled = false;
+      input.focus();
     }
 
-    function toggleKeyVis() {
-      const input = document.getElementById('apiKey');
-      input.type = input.type === 'password' ? 'text' : 'password';
+    function clearChat() {
+      history = [];
+      const m = document.getElementById('messages');
+      m.innerHTML = `<div class="welcome" id="welcome">
+        <div class="welcome-icon">🔧</div>
+        <h2>G'day Jon</h2>
+        <p>Your personal project assistant. Ask me anything about your repos, MVP, roadmap, or ideas.</p>
+        <div class="qa">
+          <button onclick="q('What should I focus on this week for itabs-quotes?')">Weekly focus</button>
+          <button onclick="q('What are my parked ideas?')">Parked ideas</button>
+          <button onclick="q('Remind me about the Will Webster connection')">Will Webster</button>
+          <button onclick="q('Help me plan next steps for getting tradies using the widget')">Next steps</button>
+        </div>
+      </div>`;
     }
 
-    function generateEnv() {
-      const key = document.getElementById('apiKey').value.trim();
-      const port = document.getElementById('port').value.trim();
-      const model = document.getElementById('model').value.trim();
-
-      if (!key) {
-        alert('Please enter your API key in Step 1 first!');
-        document.getElementById('apiKey').focus();
-        return;
-      }
-
-      let envContent = `# Jon's Assistant Configuration\n`;
-      envContent += `# Generated on ${new Date().toLocaleDateString()}\n\n`;
-      envContent += `ANTHROPIC_API_KEY=${key}\n`;
-      envContent += `PORT=${port || 3000}\n`;
-
-      const output = document.getElementById('envOutput');
-      const contents = document.getElementById('envContents');
-
-      // Keep the copy button, set text before it
-      contents.innerHTML = `<button class="copy-btn" onclick="copyEnv()">copy</button>${envContent}`;
-      output.classList.remove('hidden');
-
-      document.getElementById('step3').classList.add('complete');
-    }
-
-    function copyEnv() {
-      const contents = document.getElementById('envContents');
-      // Get text content without the copy button text
-      const text = contents.textContent.replace('copy', '').trim();
-
-      navigator.clipboard.writeText(text).then(() => {
-        const btn = contents.querySelector('.copy-btn');
-        btn.textContent = 'copied!';
-        btn.classList.add('copied');
-        setTimeout(() => {
-          btn.textContent = 'copy';
-          btn.classList.remove('copied');
-        }, 2000);
-      });
-    }
-
-    function toggleCheck(n) {
-      const li = document.getElementById('check' + n);
-      li.classList.toggle('done');
-
-      const check = li.querySelector('.check');
-      check.textContent = li.classList.contains('done') ? '✓' : '';
-
-      // Check if all done
-      const allDone = [1,2,3,4,5].every(i =>
-        document.getElementById('check' + i).classList.contains('done')
-      );
-
-      if (allDone) {
-        document.getElementById('step5').classList.add('complete');
-      }
+    function logout() {
+      API_KEY = '';
+      history = [];
+      sessionStorage.removeItem('ja_key');
+      document.getElementById('chatScreen').classList.remove('show');
+      document.getElementById('setupScreen').classList.remove('hide');
+      document.getElementById('keyInput').value = '';
+      document.getElementById('setupErr').style.display = 'none';
+      clearChat();
     }
   </script>
 </body>
