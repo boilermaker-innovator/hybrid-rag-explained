@@ -1,654 +1,559 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iTabs Generator — Auto Transcript</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #0f1117;
-            --surface: #1a1d27;
-            --surface-2: #232733;
-            --border: #2d3140;
-            --text: #e4e6ef;
-            --text-dim: #8b8fa3;
-            --accent: #3b82f6;
-            --accent-glow: rgba(59, 130, 246, 0.15);
-            --success: #22c55e;
-            --success-glow: rgba(34, 197, 94, 0.15);
-            --warning: #f59e0b;
-            --error: #ef4444;
-            --radius: 12px;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; line-height: 1.6; }
-        .container { max-width: 700px; margin: 0 auto; padding: 24px 16px; }
-
-        .header { text-align: center; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
-        .header h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 6px; }
-        .header h1 span { color: var(--accent); }
-        .header p { color: var(--text-dim); font-size: 0.95rem; }
-        .badge { display: inline-block; background: var(--success-glow); color: var(--success); font-size: 0.75rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-top: 8px; letter-spacing: 0.04em; text-transform: uppercase; }
-
-        .step { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 16px; }
-        .step.active { border-color: var(--accent); }
-        .step-label { font-size: 0.75rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
-        .step h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 4px; }
-        .step p.hint { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 16px; }
-
-        label { display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-dim); margin-bottom: 6px; }
-        input[type="text"], textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.95rem; padding: 12px 14px; border-radius: 8px; outline: none; transition: border-color 0.2s; }
-        input[type="text"]:focus, textarea:focus { border-color: var(--accent); }
-        textarea { min-height: 120px; resize: vertical; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.7; }
-
-        .url-row { display: flex; gap: 8px; }
-        .url-row input { flex: 1; }
-
-        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-primary { background: var(--accent); color: white; }
-        .btn-primary:hover:not(:disabled) { background: #2563eb; }
-        .btn-secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
-        .btn-secondary:hover:not(:disabled) { background: var(--border); }
-        .btn-success { background: var(--success); color: white; }
-        .btn-success:hover:not(:disabled) { background: #16a34a; }
-
-        .status { display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px; border-radius: 8px; font-size: 0.85rem; margin-top: 12px; line-height: 1.5; }
-        .status.loading { background: var(--accent-glow); color: var(--accent); }
-        .status.success { background: var(--success-glow); color: var(--success); }
-        .status.error { background: rgba(239, 68, 68, 0.12); color: var(--error); }
-        .status.info { background: rgba(245, 158, 11, 0.12); color: var(--warning); }
-
-        .spinner { width: 16px; height: 16px; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; margin-top: 2px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .transcript-preview { margin-top: 12px; }
-        .transcript-preview summary { color: var(--text-dim); font-size: 0.85rem; cursor: pointer; padding: 8px 0; }
-        .transcript-text { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; max-height: 200px; overflow-y: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; line-height: 1.8; color: var(--text-dim); margin-top: 8px; }
-
-        .stats { display: flex; gap: 16px; margin-top: 12px; }
-        .stat { font-size: 0.8rem; color: var(--text-dim); }
-        .stat strong { color: var(--text); font-weight: 600; }
-
-        .or-divider { display: flex; align-items: center; gap: 12px; margin: 16px 0; color: var(--text-dim); font-size: 0.8rem; }
-        .or-divider::before, .or-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-        .how-it-works { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 16px; }
-        .how-it-works h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 12px; }
-        .flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .flow-step { background: var(--surface-2); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; white-space: nowrap; }
-        .flow-arrow { color: var(--accent); font-size: 0.9rem; }
-
-        .api-info { background: var(--surface-2); border-radius: 8px; padding: 12px 16px; margin-top: 12px; font-size: 0.8rem; color: var(--text-dim); }
-        .api-info strong { color: var(--text); }
-        .api-info a { color: var(--accent); text-decoration: none; }
-
-        .key-row { display: flex; gap: 8px; align-items: center; }
-        .key-row input { flex: 1; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
-
-        .output-section { display: none; }
-        .output-section.visible { display: block; }
-
-        /* Debug log */
-        .debug-log { margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-dim); max-height: 120px; overflow-y: auto; padding: 8px; background: var(--bg); border-radius: 6px; border: 1px solid var(--border); }
-        .debug-log .log-line { padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
-        .debug-log .log-ok { color: var(--success); }
-        .debug-log .log-fail { color: var(--error); }
-        .debug-log .log-try { color: var(--warning); }
-
-        .footer { text-align: center; color: var(--text-dim); font-size: 0.8rem; margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border); }
-        .footer a { color: var(--accent); text-decoration: none; }
-
-        @media (max-width: 480px) {
-            .url-row { flex-direction: column; }
-            .flow { flex-direction: column; align-items: flex-start; }
-            .flow-arrow { transform: rotate(90deg); }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-
-        <div class="header">
-            <h1><span>iTabs</span> Generator</h1>
-            <p>Paste a YouTube link → Get your guide</p>
-            <div class="badge">✨ Auto-fetch transcript — no copy-paste</div>
-        </div>
-
-        <div class="how-it-works">
-            <h3>How it works</h3>
-            <div class="flow">
-                <div class="flow-step">📋 Paste YouTube URL</div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-step">⚡ Auto-fetch transcript</div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-step">🤖 AI creates guide</div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-step">📱 Download iTabs</div>
-            </div>
-        </div>
-
-        <!-- Step 1: YouTube URL -->
-        <div class="step active" id="step1">
-            <div class="step-label">Step 1</div>
-            <h2>YouTube Video</h2>
-            <p class="hint">Paste the URL and we'll grab the transcript automatically</p>
-
-            <label for="videoUrl">YouTube URL</label>
-            <div class="url-row">
-                <input type="text" id="videoUrl" placeholder="https://www.youtube.com/watch?v=..." oninput="updateVideoId()">
-                <button class="btn btn-primary" id="fetchBtn" onclick="fetchTranscript()">Fetch</button>
-            </div>
-
-            <div id="fetchStatus"></div>
-            <div id="debugLog" style="display:none" class="debug-log"></div>
-
-            <div id="transcriptResult" style="display:none">
-                <div class="stats" id="transcriptStats"></div>
-                <details class="transcript-preview">
-                    <summary>View raw transcript</summary>
-                    <div class="transcript-text" id="transcriptText"></div>
-                </details>
-            </div>
-
-            <div class="or-divider">or paste your own transcript below</div>
-
-            <label for="manualTranscript">Manual transcript (if auto-fetch doesn't work)</label>
-            <textarea id="manualTranscript" placeholder="Copy from YouTube's caption button, or use youtubetotranscript.com"></textarea>
-
-            <div class="api-info">
-                <strong>How it works:</strong> We try 3 free transcript APIs (no account needed).
-                If none work, paste manually from <a href="https://youtubetotranscript.com" target="_blank">YouTubeToTranscript.com</a>
-            </div>
-        </div>
-
-        <!-- Step 2: Gemini Key -->
-        <div class="step" id="step2">
-            <div class="step-label">Step 2</div>
-            <h2>Gemini AI Key</h2>
-            <p class="hint">Free from Google — creates the teachable content</p>
-            <label for="geminiKey">API Key</label>
-            <div class="key-row">
-                <input type="text" id="geminiKey" placeholder="AIza...">
-                <button class="btn btn-secondary" onclick="saveKey()">Save</button>
-            </div>
-            <div id="keyStatus"></div>
-            <div class="api-info">
-                Don't have one? <a href="https://aistudio.google.com/apikey" target="_blank">Get a free Gemini API key</a> (takes 30 seconds)
-            </div>
-        </div>
-
-        <!-- Step 3: Context -->
-        <div class="step" id="step3">
-            <div class="step-label">Step 3</div>
-            <h2>Quick Context</h2>
-            <p class="hint">Help the AI make a better guide</p>
-            <label for="audience">Who is this for?</label>
-            <input type="text" id="audience" placeholder="e.g. Me — a boilermaker learning about AI tools" style="margin-bottom: 12px;">
-            <label for="goal">What do you want to remember?</label>
-            <input type="text" id="goal" placeholder="e.g. The key steps for setting up Claude Code">
-        </div>
-
-        <!-- Generate -->
-        <div style="text-align: center; margin: 24px 0;">
-            <button class="btn btn-success" id="generateBtn" onclick="generateiTabs()" style="padding: 14px 32px; font-size: 1rem;" disabled>
-                🚀 Create My iTabs Guide
-            </button>
-            <div id="generateStatus" style="margin-top: 12px;"></div>
-        </div>
-
-        <!-- Output -->
-        <div class="output-section" id="outputSection">
-            <div class="step">
-                <div class="step-label" style="color: var(--success)">Done</div>
-                <h2>Your iTabs Guide</h2>
-                <p class="hint">Preview it, then download</p>
-                <div style="display: flex; gap: 8px; margin-top: 12px;">
-                    <button class="btn btn-primary" onclick="previewOutput()">👁 Preview</button>
-                    <button class="btn btn-success" onclick="downloadOutput()">💾 Download HTML</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="footer">
-            Built by Jon — boilermaker from Perth, vibe coding with Claude<br>
-            <a href="https://itabs.ai">itabs.ai</a>
-        </div>
-    </div>
-
-    <script>
-        // ========== STATE ==========
-        let transcriptData = null;
-        let videoId = null;
-        let generatedHTML = null;
-
-        // Load saved key
-        const savedKey = localStorage.getItem('gemini_api_key');
-        if (savedKey) document.getElementById('geminiKey').value = savedKey;
-
-        // ========== VIDEO ID ==========
-        function extractVideoId(url) {
-            const patterns = [
-                /(?:v=|\/v\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
-                /(?:embed\/)([a-zA-Z0-9_-]{11})/,
-                /^([a-zA-Z0-9_-]{11})$/
-            ];
-            for (const p of patterns) {
-                const m = url.match(p);
-                if (m) return m[1];
-            }
-            return null;
-        }
-
-        function updateVideoId() {
-            videoId = extractVideoId(document.getElementById('videoUrl').value.trim());
-            checkReady();
-        }
-
-        // ========== DEBUG LOG ==========
-        function debugLog(msg, type) {
-            const log = document.getElementById('debugLog');
-            log.style.display = 'block';
-            const cls = type === 'ok' ? 'log-ok' : type === 'fail' ? 'log-fail' : 'log-try';
-            log.innerHTML += `<div class="log-line ${cls}">${new Date().toLocaleTimeString()} — ${msg}</div>`;
-            log.scrollTop = log.scrollHeight;
-        }
-
-        // ========== FETCH WITH TIMEOUT ==========
-        function fetchWithTimeout(url, options, timeout) {
-            const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), timeout);
-            return fetch(url, { ...options, signal: controller.signal })
-                .finally(() => clearTimeout(timer));
-        }
-
-        // ========== TRANSCRIPT FETCH ==========
-        async function fetchTranscript() {
-            const url = document.getElementById('videoUrl').value.trim();
-            videoId = extractVideoId(url);
-
-            if (!videoId) {
-                showStatus('fetchStatus', 'error', "Can't find a video ID in that URL. Check the link?");
-                return;
-            }
-
-            const fetchBtn = document.getElementById('fetchBtn');
-            fetchBtn.disabled = true;
-            fetchBtn.textContent = '...';
-            document.getElementById('debugLog').innerHTML = '';
-
-            showStatus('fetchStatus', 'loading', 'Fetching transcript...');
-
-            // ---- API 1: TubeText (with timestamps) ----
-            debugLog(`Trying TubeText API for video: ${videoId}`, 'try');
-            try {
-                const resp = await fetchWithTimeout(
-                    `https://tubetext.vercel.app/youtube/transcript-with-timestamps?video_id=${videoId}`,
-                    { method: 'GET' },
-                    12000
-                );
-                debugLog(`TubeText responded: ${resp.status} ${resp.statusText}`, resp.ok ? 'ok' : 'fail');
-
-                if (resp.ok) {
-                    const data = await resp.json();
-                    if (data.success && data.data && data.data.full_text) {
-                        transcriptData = data.data.full_text;
-                        const title = data.data.details?.title || '';
-                        debugLog(`Got transcript: ${transcriptData.length} chars. Title: ${title}`, 'ok');
-                        showTranscriptSuccess(transcriptData, 'TubeText API', title);
-                        done(); return;
-                    } else {
-                        debugLog(`TubeText returned success=false or empty data`, 'fail');
-                    }
-                }
-            } catch (e) {
-                debugLog(`TubeText error: ${e.message}`, 'fail');
-            }
-
-            // ---- API 2: jaypaun007 (POST, plain text) ----
-            debugLog(`Trying jaypaun007 API...`, 'try');
-            try {
-                const resp = await fetchWithTimeout(
-                    'https://youtube-transcript-api-tau-one.vercel.app/transcript',
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ video_url: `https://www.youtube.com/watch?v=${videoId}` })
-                    },
-                    12000
-                );
-                debugLog(`jaypaun007 responded: ${resp.status} ${resp.statusText}`, resp.ok ? 'ok' : 'fail');
-
-                if (resp.ok) {
-                    const data = await resp.json();
-                    if (data.transcript && data.transcript.length > 50) {
-                        transcriptData = data.transcript;
-                        debugLog(`Got transcript: ${transcriptData.length} chars`, 'ok');
-                        showTranscriptSuccess(transcriptData, 'jaypaun007 API');
-                        done(); return;
-                    } else {
-                        debugLog(`jaypaun007 returned empty/short transcript`, 'fail');
-                    }
-                }
-            } catch (e) {
-                debugLog(`jaypaun007 error: ${e.message}`, 'fail');
-            }
-
-            // ---- API 3: mongj/scribr (GET, text format) ----
-            debugLog(`Trying Scribr API...`, 'try');
-            try {
-                const resp = await fetchWithTimeout(
-                    `https://youtube-transcriber-api.vercel.app/v1/transcripts?id=${videoId}&lang=en&type=text&lb=1`,
-                    { method: 'GET' },
-                    12000
-                );
-                debugLog(`Scribr responded: ${resp.status} ${resp.statusText}`, resp.ok ? 'ok' : 'fail');
-
-                if (resp.ok) {
-                    const data = await resp.json();
-                    if (data.transcripts && data.transcripts.length > 0 && data.transcripts[0].text) {
-                        transcriptData = data.transcripts[0].text;
-                        if (transcriptData.length > 50) {
-                            debugLog(`Got transcript: ${transcriptData.length} chars`, 'ok');
-                            showTranscriptSuccess(transcriptData, 'Scribr API');
-                            done(); return;
-                        }
-                    }
-                    debugLog(`Scribr returned empty transcript`, 'fail');
-                }
-            } catch (e) {
-                debugLog(`Scribr error: ${e.message}`, 'fail');
-            }
-
-            // ---- All failed ----
-            debugLog(`All 3 APIs failed. Manual paste needed.`, 'fail');
-            showStatus('fetchStatus', 'error',
-                "Auto-fetch didn't work for this video. This usually means CORS blocking or the video has no captions. " +
-                "No worries — paste your transcript manually below. The debug log above shows what happened.");
-
-            function done() {
-                fetchBtn.disabled = false;
-                fetchBtn.textContent = 'Fetch';
-                checkReady();
-            }
-
-            fetchBtn.disabled = false;
-            fetchBtn.textContent = 'Retry';
-        }
-
-        function showTranscriptSuccess(text, source, title) {
-            const wordCount = text.split(/\s+/).length;
-            const readMins = Math.ceil(wordCount / 200);
-
-            document.getElementById('transcriptResult').style.display = 'block';
-            document.getElementById('transcriptStats').innerHTML = `
-                <div class="stat"><strong>${wordCount.toLocaleString()}</strong> words</div>
-                <div class="stat"><strong>~${readMins} min</strong> read</div>
-                <div class="stat">via <strong>${source}</strong></div>
-            `;
-            document.getElementById('transcriptText').textContent =
-                text.substring(0, 3000) + (text.length > 3000 ? '\n\n... [truncated for preview]' : '');
-
-            const titleNote = title ? ` — "${title}"` : '';
-            showStatus('fetchStatus', 'success', `Transcript fetched${titleNote} — ${wordCount.toLocaleString()} words`);
-        }
-
-        // ========== GEMINI KEY ==========
-        function saveKey() {
-            const key = document.getElementById('geminiKey').value.trim();
-            if (key) {
-                localStorage.setItem('gemini_api_key', key);
-                showStatus('keyStatus', 'success', 'Key saved locally');
-                checkReady();
-            }
-        }
-
-        // ========== READY CHECK ==========
-        function checkReady() {
-            const hasTranscript = transcriptData || document.getElementById('manualTranscript').value.trim().length > 50;
-            const hasKey = document.getElementById('geminiKey').value.trim().length > 5;
-            const hasVideo = !!videoId;
-            document.getElementById('generateBtn').disabled = !(hasTranscript && hasKey && hasVideo);
-        }
-
-        document.getElementById('manualTranscript').addEventListener('input', checkReady);
-        document.getElementById('geminiKey').addEventListener('input', checkReady);
-
-        // ========== GENERATE ==========
-        async function generateiTabs() {
-            const key = document.getElementById('geminiKey').value.trim();
-            const transcript = transcriptData || document.getElementById('manualTranscript').value.trim();
-            const audience = document.getElementById('audience').value.trim() || 'Someone who wants to learn and take action';
-            const goal = document.getElementById('goal').value.trim() || 'Remember the key concepts and steps';
-
-            if (!transcript || !key || !videoId) return;
-
-            const generateBtn = document.getElementById('generateBtn');
-            generateBtn.disabled = true;
-            generateBtn.textContent = '⏳ Creating guide...';
-            showStatus('generateStatus', 'loading', 'Sending to Gemini AI...');
-
-            const prompt = `You are an expert at creating teachable, action-oriented guides from video content.
-
-Given this transcript from a YouTube video, create an iTabs guide.
-
-AUDIENCE: ${audience}
-GOAL: ${goal}
-VIDEO ID: ${videoId}
-
-RULES:
-- Extract 4-7 key sections from the video
-- Each section needs: a clear title, a "Why it matters" explanation, the key steps/facts, and a practical takeaway
-- Write in simple, everyday language — no jargon
-- Include timestamps where you can identify them
-- Focus on ACTION — what should the reader DO with this info?
-- Make it scannable — someone should find what they need in 30 seconds
-
-OUTPUT FORMAT — Return ONLY valid JSON, no markdown backticks:
-{
-  "title": "Guide title",
-  "sections": [
-    {
-      "number": 1,
-      "title": "Section Title",
-      "why": "Why this matters (1-2 sentences)",
-      "content": "The key info, steps, or facts (2-4 sentences)",
-      "takeaway": "What to DO with this info",
-      "timestamp": "M:SS"
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jon's Assistant — Setup</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f1117;
+      --bg-secondary: #1a1d27;
+      --bg-input: #232733;
+      --accent: #f59e0b;
+      --accent-dim: rgba(245, 158, 11, 0.15);
+      --text-primary: #e8eaed;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --border: #2d3140;
+      --success: #22c55e;
+      --success-dim: rgba(34, 197, 94, 0.15);
+      --error: #ef4444;
     }
-  ]
-}
 
-TRANSCRIPT:
-${transcript.substring(0, 25000)}`;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-            try {
-                const resp = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: prompt }] }],
-                            generationConfig: { temperature: 0.7, maxOutputTokens: 4096 }
-                        })
-                    }
-                );
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
 
-                if (!resp.ok) {
-                    const err = await resp.text();
-                    throw new Error(`Gemini ${resp.status}: ${err.substring(0, 200)}`);
-                }
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+    }
 
-                const data = await resp.json();
-                const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-                const guide = JSON.parse(cleaned);
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
 
-                generatedHTML = buildHTML(guide);
-                showStatus('generateStatus', 'success', 'Guide created! Preview or download below.');
-                document.getElementById('outputSection').classList.add('visible');
+    .logo {
+      width: 56px;
+      height: 56px;
+      background: var(--accent);
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      font-size: 22px;
+      color: var(--bg-primary);
+      margin-bottom: 16px;
+    }
 
-            } catch (err) {
-                showStatus('generateStatus', 'error', `Error: ${err.message}`);
-            }
+    .header h1 {
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
 
-            generateBtn.disabled = false;
-            generateBtn.textContent = '🚀 Create My iTabs Guide';
-            checkReady();
-        }
+    .header p {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
 
-        // ========== BUILD HTML ==========
-        function buildHTML(guide) {
-            const thumbUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-            const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+    /* Steps */
+    .step {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+      transition: border-color 0.3s;
+    }
 
-            let sectionsHTML = '';
-            guide.sections.forEach((s, i) => {
-                const tsLink = s.timestamp
-                    ? `<a href="${videoUrl}&t=${timestampToSeconds(s.timestamp)}" target="_blank" class="timestamp">▶ ${s.timestamp}</a>`
-                    : '';
+    .step.active {
+      border-color: var(--accent);
+    }
 
-                sectionsHTML += `
-        <div class="itab-section">
-            <div class="itab-header" onclick="toggleSection(this)">
-                <div class="itab-title">
-                    <span class="itab-number">${s.number || i + 1}</span>
-                    <span class="itab-name">${esc(s.title)}</span>
-                </div>
-                <button class="i-button">i</button>
-            </div>
-            <div class="itab-content">
-                <div class="tabs">
-                    <button class="tab active" onclick="showTab(this, 'why-${i}')">Why It Matters</button>
-                    <button class="tab" onclick="showTab(this, 'what-${i}')">Key Info</button>
-                    <button class="tab" onclick="showTab(this, 'do-${i}')">What To Do</button>
-                </div>
-                <div class="tab-panel show" id="why-${i}">
-                    <p>${esc(s.why)}</p>
-                    ${tsLink}
-                </div>
-                <div class="tab-panel" id="what-${i}">
-                    <p>${esc(s.content)}</p>
-                </div>
-                <div class="tab-panel" id="do-${i}">
-                    <p><strong>→ </strong>${esc(s.takeaway)}</p>
-                </div>
-            </div>
-        </div>`;
-            });
+    .step.complete {
+      border-color: var(--success);
+    }
 
-            // NOTE: script tags split with concatenation to avoid breaking the parent script
-            const openScript = '<' + 'script>';
-            const closeScript = '</' + 'script>';
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
 
-            return `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${esc(guide.title)} — iTabs Guide</title>
-    <meta property="og:title" content="${esc(guide.title)}">
-    <meta property="og:image" content="${thumbUrl}">
-    <style>
-        :root { --bg: #0f1117; --surface: #1a1d27; --surface-2: #232733; --border: #2d3140; --text: #e4e6ef; --text-dim: #8b8fa3; --accent: #3b82f6; --success: #22c55e; --radius: 12px; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
-        .container { max-width: 600px; margin: 0 auto; padding: 16px; }
-        h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
-        .subtitle { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 16px; }
-        .video-embed { position: relative; padding-bottom: 56.25%; height: 0; border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; }
-        .video-embed iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
-        .itab-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; overflow: hidden; }
-        .itab-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; cursor: pointer; }
-        .itab-title { display: flex; align-items: center; gap: 10px; }
-        .itab-number { background: var(--accent); color: white; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; flex-shrink: 0; }
-        .itab-name { font-weight: 600; font-size: 0.95rem; }
-        .i-button { background: var(--accent); color: white; border: none; width: 28px; height: 28px; border-radius: 50%; font-weight: 700; font-size: 0.85rem; cursor: pointer; flex-shrink: 0; }
-        .itab-content { display: none; padding: 0 16px 16px; }
-        .itab-section.open .itab-content { display: block; }
-        .tabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
-        .tab { background: var(--surface-2); color: var(--text-dim); border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 500; cursor: pointer; font-family: inherit; }
-        .tab.active { background: var(--accent); color: white; }
-        .tab-panel { display: none; }
-        .tab-panel.show { display: block; }
-        .tab-panel p { font-size: 0.9rem; line-height: 1.7; }
-        .timestamp { display: inline-block; margin-top: 10px; color: var(--accent); text-decoration: none; font-size: 0.85rem; font-weight: 500; }
-        .timestamp:hover { text-decoration: underline; }
-        footer { text-align: center; color: var(--text-dim); font-size: 0.75rem; margin-top: 24px; padding: 16px 0; border-top: 1px solid var(--border); }
-        footer a { color: var(--accent); text-decoration: none; }
-    </style>
+    .step-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .step.complete .step-number {
+      background: var(--success-dim);
+      color: var(--success);
+    }
+
+    .step-title {
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .step-desc {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .step-desc a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .step-desc a:hover {
+      text-decoration: underline;
+    }
+
+    /* Form Fields */
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="number"],
+    textarea {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 12px;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--accent);
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .field-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: -8px;
+      margin-bottom: 12px;
+    }
+
+    .toggle-vis {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      float: right;
+      margin-top: -4px;
+    }
+
+    .toggle-vis:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Buttons */
+    .btn {
+      background: var(--accent);
+      border: none;
+      color: var(--bg-primary);
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .btn:hover {
+      background: #d97706;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .btn-success {
+      background: var(--success);
+    }
+
+    .btn-success:hover {
+      background: #16a34a;
+    }
+
+    /* Output */
+    .output-box {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .copy-btn.copied {
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    /* Validation */
+    .valid { border-color: var(--success) !important; }
+    .invalid { border-color: var(--error) !important; }
+
+    .validation-msg {
+      font-size: 12px;
+      margin-top: -8px;
+      margin-bottom: 12px;
+    }
+
+    .validation-msg.ok { color: var(--success); }
+    .validation-msg.err { color: var(--error); }
+
+    /* Checklist */
+    .checklist {
+      list-style: none;
+      margin: 12px 0;
+    }
+
+    .checklist li {
+      padding: 8px 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .checklist li .check {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 12px;
+    }
+
+    .checklist li.done .check {
+      border-color: var(--success);
+      background: var(--success-dim);
+      color: var(--success);
+    }
+
+    .checklist li.done {
+      color: var(--text-primary);
+    }
+
+    /* Terminal commands */
+    .terminal {
+      background: #000;
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: #22c55e;
+      margin: 12px 0;
+      position: relative;
+    }
+
+    .terminal .prompt { color: var(--accent); }
+    .terminal .cmd { color: var(--text-primary); }
+
+    .hidden { display: none; }
+
+    @media (max-width: 600px) {
+      body { padding: 20px 12px; }
+      .step { padding: 18px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>${esc(guide.title)}</h1>
-        <p class="subtitle">iTabs Guide • Tap sections to explore</p>
-        <div class="video-embed">
-            <iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>
-        </div>
-        ${sectionsHTML}
-        <footer>Created with <a href="https://itabs.ai">iTabs</a> — watch once, reference forever</footer>
+  <div class="container">
+    <div class="header">
+      <div class="logo">JA</div>
+      <h1>Jon's Assistant — Setup</h1>
+      <p>Fill in the fields below, then follow the steps to get running</p>
     </div>
-    ${openScript}
-        function toggleSection(header) {
-            header.closest('.itab-section').classList.toggle('open');
-        }
-        function showTab(btn, panelId) {
-            const section = btn.closest('.itab-content');
-            section.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('show'));
-            btn.classList.add('active');
-            document.getElementById(panelId).classList.add('show');
-        }
-        document.querySelector('.itab-section')?.classList.add('open');
-    ${closeScript}
-</body>
-</html>`;
-        }
 
-        // ========== HELPERS ==========
-        function timestampToSeconds(ts) {
-            if (!ts) return 0;
-            const parts = ts.split(':').map(Number);
-            if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
-            if (parts.length === 2) return parts[0] * 60 + parts[1];
-            return parts[0] || 0;
-        }
+    <!-- Step 1: API Key -->
+    <div class="step active" id="step1">
+      <div class="step-header">
+        <div class="step-number">1</div>
+        <div class="step-title">Claude API Key</div>
+      </div>
+      <div class="step-desc">
+        Get your key from <a href="https://console.anthropic.com/settings/keys" target="_blank">console.anthropic.com/settings/keys</a>. Click "Create Key", give it a name, and paste it below.
+      </div>
+      <label>
+        API Key
+        <button class="toggle-vis" onclick="toggleKeyVis()">show/hide</button>
+      </label>
+      <input type="password" id="apiKey" placeholder="sk-ant-api03-..." oninput="validateKey()">
+      <div id="keyValidation" class="validation-msg hidden"></div>
+    </div>
 
-        function esc(str) {
-            if (!str) return '';
-            const d = document.createElement('div');
-            d.textContent = str;
-            return d.innerHTML;
-        }
+    <!-- Step 2: Settings -->
+    <div class="step" id="step2">
+      <div class="step-header">
+        <div class="step-number">2</div>
+        <div class="step-title">Settings (optional)</div>
+      </div>
+      <div class="step-desc">
+        Defaults work fine — only change these if you know what you're doing.
+      </div>
+      <label>Port number</label>
+      <input type="number" id="port" value="3000" min="1024" max="65535">
+      <div class="field-hint">Default is 3000. Change if something else uses that port.</div>
 
-        function showStatus(id, type, msg) {
-            const el = document.getElementById(id);
-            const spinner = type === 'loading' ? '<div class="spinner"></div>' : '';
-            const icon = type === 'success' ? '✓ ' : type === 'error' ? '✗ ' : '';
-            el.innerHTML = `<div class="status ${type}">${spinner}${icon}${msg}</div>`;
-        }
+      <label>Model</label>
+      <input type="text" id="model" value="claude-sonnet-4-20250514">
+      <div class="field-hint">claude-sonnet-4-20250514 (fast+cheap) or claude-opus-4-20250514 (smarter+pricier)</div>
+    </div>
 
-        function previewOutput() {
-            if (!generatedHTML) return;
-            const win = window.open('', '_blank');
-            win.document.write(generatedHTML);
-            win.document.close();
-        }
+    <!-- Step 3: Generate -->
+    <div class="step" id="step3">
+      <div class="step-header">
+        <div class="step-number">3</div>
+        <div class="step-title">Generate your .env file</div>
+      </div>
+      <div class="step-desc">
+        Click the button to generate your config. Then copy the contents into a new file called <strong>.env</strong> in your project folder.
+      </div>
+      <button class="btn" onclick="generateEnv()">Generate .env contents</button>
+      <div id="envOutput" class="hidden" style="margin-top: 16px;">
+        <div class="output-box" id="envContents">
+          <button class="copy-btn" onclick="copyEnv()">copy</button>
+        </div>
+        <div class="step-desc" style="margin-bottom: 0;">
+          <strong>How to create the file:</strong><br>
+          1. Open Notepad<br>
+          2. Paste the contents above<br>
+          3. File → Save As → navigate to your <code>jon-assistant</code> folder<br>
+          4. Set "Save as type" to <strong>All Files (*.*)</strong><br>
+          5. Name the file exactly: <strong>.env</strong><br>
+          6. Click Save
+        </div>
+      </div>
+    </div>
 
-        function downloadOutput() {
-            if (!generatedHTML) return;
-            const blob = new Blob([generatedHTML], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `itabs-guide-${videoId}.html`;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
+    <!-- Step 4: Run -->
+    <div class="step" id="step4">
+      <div class="step-header">
+        <div class="step-number">4</div>
+        <div class="step-title">Install and Run</div>
+      </div>
+      <div class="step-desc">
+        Make sure you have <a href="https://nodejs.org" target="_blank">Node.js</a> installed (LTS version). Then open a terminal in your project folder and run:
+      </div>
+      <div class="terminal">
+        <div><span class="prompt">></span> <span class="cmd">npm install</span></div>
+        <div style="margin-top: 8px;"><span class="prompt">></span> <span class="cmd">npm start</span></div>
+      </div>
+      <div class="step-desc">
+        <strong>To open a terminal in your folder:</strong> Open File Explorer, navigate to <code>jon-assistant</code>, click the address bar, type <strong>cmd</strong> and hit Enter.
+      </div>
+    </div>
 
-        checkReady();
-    </script>
+    <!-- Step 5: Verify -->
+    <div class="step" id="step5">
+      <div class="step-header">
+        <div class="step-number">5</div>
+        <div class="step-title">Verify it works</div>
+      </div>
+      <div class="step-desc" id="openLink">
+        Open <a href="http://localhost:3000" target="_blank">http://localhost:3000</a> in your browser. You should see the chat interface.
+      </div>
+      <ul class="checklist">
+        <li id="check1"><span class="check"></span> Downloaded all project files</li>
+        <li id="check2"><span class="check"></span> Created .env with API key</li>
+        <li id="check3"><span class="check"></span> Ran npm install</li>
+        <li id="check4"><span class="check"></span> Ran npm start</li>
+        <li id="check5"><span class="check"></span> Chat loads in browser</li>
+      </ul>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button class="btn-secondary btn" style="flex:1; min-width: 120px;" onclick="toggleCheck(1)">✓ Files ready</button>
+        <button class="btn-secondary btn" style="flex:1; min-width: 120px;" onclick="toggleCheck(2)">✓ .env done</button>
+        <button class="btn-secondary btn" style="flex:1; min-width: 120px;" onclick="toggleCheck(3)">✓ Installed</button>
+        <button class="btn-secondary btn" style="flex:1; min-width: 120px;" onclick="toggleCheck(4)">✓ Running</button>
+        <button class="btn-secondary btn" style="flex:1; min-width: 120px;" onclick="toggleCheck(5)">✓ It works!</button>
+      </div>
+    </div>
+
+    <!-- Security reminder -->
+    <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 12px; font-family: 'JetBrains Mono', monospace;">
+      🔒 Your API key stays on your machine. Never share it in chats, emails, or commit it to GitHub.
+    </div>
+  </div>
+
+  <script>
+    function validateKey() {
+      const key = document.getElementById('apiKey').value.trim();
+      const msg = document.getElementById('keyValidation');
+      const input = document.getElementById('apiKey');
+
+      if (!key) {
+        msg.classList.add('hidden');
+        input.classList.remove('valid', 'invalid');
+        return;
+      }
+
+      msg.classList.remove('hidden');
+
+      if (key.startsWith('sk-ant-')) {
+        msg.textContent = '✓ Looks like a valid Anthropic key';
+        msg.className = 'validation-msg ok';
+        input.classList.add('valid');
+        input.classList.remove('invalid');
+        document.getElementById('step1').classList.add('complete');
+      } else {
+        msg.textContent = '✗ Key should start with sk-ant-';
+        msg.className = 'validation-msg err';
+        input.classList.add('invalid');
+        input.classList.remove('valid');
+        document.getElementById('step1').classList.remove('complete');
+      }
+    }
+
+    function toggleKeyVis() {
+      const input = document.getElementById('apiKey');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    function generateEnv() {
+      const key = document.getElementById('apiKey').value.trim();
+      const port = document.getElementById('port').value.trim();
+      const model = document.getElementById('model').value.trim();
+
+      if (!key) {
+        alert('Please enter your API key in Step 1 first!');
+        document.getElementById('apiKey').focus();
+        return;
+      }
+
+      let envContent = `# Jon's Assistant Configuration\n`;
+      envContent += `# Generated on ${new Date().toLocaleDateString()}\n\n`;
+      envContent += `ANTHROPIC_API_KEY=${key}\n`;
+      envContent += `PORT=${port || 3000}\n`;
+
+      const output = document.getElementById('envOutput');
+      const contents = document.getElementById('envContents');
+
+      // Keep the copy button, set text before it
+      contents.innerHTML = `<button class="copy-btn" onclick="copyEnv()">copy</button>${envContent}`;
+      output.classList.remove('hidden');
+
+      document.getElementById('step3').classList.add('complete');
+    }
+
+    function copyEnv() {
+      const contents = document.getElementById('envContents');
+      // Get text content without the copy button text
+      const text = contents.textContent.replace('copy', '').trim();
+
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = contents.querySelector('.copy-btn');
+        btn.textContent = 'copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'copy';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+
+    function toggleCheck(n) {
+      const li = document.getElementById('check' + n);
+      li.classList.toggle('done');
+
+      const check = li.querySelector('.check');
+      check.textContent = li.classList.contains('done') ? '✓' : '';
+
+      // Check if all done
+      const allDone = [1,2,3,4,5].every(i =>
+        document.getElementById('check' + i).classList.contains('done')
+      );
+
+      if (allDone) {
+        document.getElementById('step5').classList.add('complete');
+      }
+    }
+  </script>
 </body>
 </html>
