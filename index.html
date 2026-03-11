@@ -1,336 +1,327 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>iTabs Quotes — Interactive Quote Widgets for Trades</title>
-<meta name="description" content="Turn any quoting process into an interactive widget with one JSON config. Open source, AI-powered, zero dependencies.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg-main: #0c1117;
-  --bg-card: #151c25;
-  --bg-hover: #1a2332;
-  --bg-dark: #0a0e14;
-  --border: #222d3a;
-  --brand: #f59e0b;
-  --brand2: #d97706;
-  --brand-glow: rgba(245, 158, 11, 0.15);
-  --green: #22c55e;
-  --blue: #3b82f6;
-  --text: #e8ecf1;
-  --muted: #8896a7;
-  --dim: #5a6a7d;
-  --font: 'Plus Jakarta Sans', sans-serif;
-  --mono: 'JetBrains Mono', monospace;
-  --radius: 14px;
-}
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: var(--font); background: var(--bg-main); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>iTabs | Hybrid RAG Explained</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --bg-primary: #0a0a0f; --bg-secondary: #12121a; --bg-tertiary: #1e1e2e;
+            --text-primary: #ffffff; --text-secondary: #9090b0;
+            --accent: #7c3aed; --accent2: #06b6d4; --i-button: #f59e0b;
+            --card-radius: 16px; --transition: 0.2s ease;
+        }
+        html, body { height: 100%; overflow: hidden; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.5; }
+        .container { max-width: 430px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; position: relative; }
 
-/* Grain overlay */
-body::after {
-  content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events: none; z-index: 0;
-}
+```
+    .progress-container { display: flex; gap: 4px; padding: 12px 16px 8px; position: absolute; top: 0; left: 0; right: 0; z-index: 100; background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); }
+    .progress-segment { flex: 1; height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px; transition: background var(--transition); }
+    .progress-segment.viewed { background: rgba(255,255,255,0.6); }
+    .progress-segment.active { background: var(--accent); }
 
-.page { position: relative; z-index: 1; }
+    .cards-wrapper { flex: 1; position: relative; overflow: hidden; }
+    .card { position: absolute; inset: 0; display: flex; flex-direction: column; opacity: 0; transform: translateX(100%); transition: all 0.3s ease; pointer-events: none; }
+    .card.active { opacity: 1; transform: translateX(0); pointer-events: all; }
+    .card.prev { opacity: 0; transform: translateX(-100%); }
 
-/* Hero */
-.hero {
-  max-width: 600px; margin: 0 auto; padding: 60px 20px 40px; text-align: center;
-}
-.hero-badge {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: var(--bg-card); border: 1px solid var(--border);
-  padding: 6px 16px; border-radius: 20px; font-size: 0.78rem; color: var(--dim);
-  margin-bottom: 24px;
-}
-.hero-badge .dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+    .card-hero { padding: 52px 20px 20px; min-height: 38%; display: flex; flex-direction: column; justify-content: flex-end; }
+    .hero-default { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
+    .hero-purple  { background: linear-gradient(135deg, #4c1d95 0%, #1e1b4b 100%); }
+    .hero-cyan    { background: linear-gradient(135deg, #164e63 0%, #0c4a6e 100%); }
+    .hero-amber   { background: linear-gradient(135deg, #78350f 0%, #431407 100%); }
+    .hero-green   { background: linear-gradient(135deg, #14532d 0%, #052e16 100%); }
+    .hero-red     { background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%); }
 
-.hero h1 {
-  font-size: 2.2rem; font-weight: 800; line-height: 1.15; margin-bottom: 16px;
-  background: linear-gradient(135deg, var(--text) 0%, var(--brand) 50%, var(--text) 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  animation: shimmer 6s ease-in-out infinite;
-}
-.hero h1 em {
-  font-style: normal;
-  background: linear-gradient(135deg, var(--brand), #fbbf24);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
+    .card-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.15em; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 8px; }
+    .tag-purple { color: #a78bfa; } .tag-cyan { color: #67e8f9; } .tag-amber { color: #fcd34d; } .tag-green { color: #6ee7b7; } .tag-red { color: #fca5a5; }
+    .card-headline { font-size: clamp(20px, 5vw, 26px); font-weight: 700; line-height: 1.25; }
+    .hero-default em { color: #cbd5e1; font-style: normal; }
+    .hero-purple  em { color: #a78bfa; font-style: normal; }
+    .hero-cyan    em { color: #67e8f9; font-style: normal; }
+    .hero-amber   em { color: #fcd34d; font-style: normal; }
+    .hero-green   em { color: #6ee7b7; font-style: normal; }
+    .hero-red     em { color: #fca5a5; font-style: normal; }
 
-.hero p {
-  color: var(--muted); font-size: 1.05rem; line-height: 1.6; margin-bottom: 32px;
-  max-width: 480px; margin-left: auto; margin-right: auto;
-}
+    .card-body { flex: 1; padding: 20px; background: var(--bg-secondary); overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+    .card-summary { font-size: 15px; color: var(--text-secondary); line-height: 1.7; }
+    .analogy-box { background: var(--bg-tertiary); border-radius: 12px; padding: 14px; border-left: 3px solid var(--accent2); }
+    .analogy-title { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent2); margin-bottom: 6px; }
+    .analogy-text { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+    .i-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+    .i-button { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); border-radius: 20px; color: var(--i-button); font-size: 13px; font-weight: 600; cursor: pointer; transition: all var(--transition); font-family: inherit; }
+    .i-button:hover { background: rgba(245,158,11,0.22); }
+    .i-dot { width: 18px; height: 18px; background: var(--i-button); color: #000; border-radius: 50%; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
-.hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .nav-area { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px 20px; background: var(--bg-secondary); border-top: 1px solid rgba(255,255,255,0.06); }
+    .nav-btn { width: 44px; height: 44px; background: rgba(255,255,255,0.08); border: none; border-radius: 50%; color: var(--text-primary); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all var(--transition); }
+    .nav-btn:hover:not(:disabled) { background: rgba(255,255,255,0.14); }
+    .nav-btn:disabled { opacity: 0.25; cursor: default; }
+    .card-counter { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
 
-.btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 14px 28px; border-radius: 12px; border: none;
-  font-family: var(--font); font-weight: 700; font-size: 0.95rem;
-  cursor: pointer; transition: all 0.3s; text-decoration: none;
-}
-.btn-primary {
-  background: linear-gradient(135deg, var(--brand), var(--brand2));
-  color: #000; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3);
-}
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(245, 158, 11, 0.4); }
-.btn-secondary {
-  background: var(--bg-card); color: var(--text); border: 1px solid var(--border);
-}
-.btn-secondary:hover { border-color: var(--brand); transform: translateY(-2px); }
-
-/* How it works */
-.section { max-width: 600px; margin: 0 auto; padding: 20px 20px 40px; }
-.section-label {
-  font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
-  color: var(--brand); margin-bottom: 12px;
-}
-.section h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 20px; }
-
-/* Flow cards */
-.flow { display: flex; flex-direction: column; gap: 0; }
-.flow-step {
-  display: flex; gap: 16px; padding: 20px 0;
-  border-bottom: 1px solid var(--border);
-  opacity: 0; animation: fadeInUp 0.5s ease forwards;
-}
-.flow-step:last-child { border-bottom: none; }
-.flow-step:nth-child(1) { animation-delay: 0.1s; }
-.flow-step:nth-child(2) { animation-delay: 0.2s; }
-.flow-step:nth-child(3) { animation-delay: 0.3s; }
-.flow-step:nth-child(4) { animation-delay: 0.4s; }
-.flow-step:nth-child(5) { animation-delay: 0.5s; }
-.flow-step:nth-child(6) { animation-delay: 0.6s; }
-
-.flow-icon {
-  width: 40px; height: 40px; flex-shrink: 0;
-  background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
-  display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
-}
-.flow-text h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
-.flow-text p { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
-
-/* Three paths */
-.paths { display: flex; flex-direction: column; gap: 12px; }
-.path-card {
-  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 20px; transition: all 0.3s; text-decoration: none; color: var(--text);
-  display: block;
-}
-.path-card:hover { border-color: var(--brand); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
-.path-top { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-.path-icon {
-  width: 36px; height: 36px;
-  background: linear-gradient(135deg, var(--brand), var(--brand2));
-  border-radius: 8px; display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; flex-shrink: 0;
-}
-.path-title { font-weight: 700; font-size: 0.95rem; }
-.path-card p { font-size: 0.83rem; color: var(--muted); line-height: 1.5; }
-.path-tag {
-  display: inline-block; margin-top: 10px; padding: 4px 10px;
-  background: var(--bg-hover); border-radius: 6px;
-  font-size: 0.7rem; color: var(--dim); font-weight: 600;
-}
-
-/* Use cases */
-.use-cases { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.use-case {
-  background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
-  padding: 14px; text-align: center; transition: all 0.2s;
-}
-.use-case:hover { border-color: rgba(245, 158, 11, 0.3); }
-.use-case .uc-icon { font-size: 1.5rem; margin-bottom: 6px; }
-.use-case .uc-name { font-size: 0.8rem; font-weight: 600; }
-.use-case .uc-desc { font-size: 0.7rem; color: var(--dim); margin-top: 2px; }
-
-/* Quote */
-.quote-block {
-  background: var(--bg-card); border-left: 4px solid var(--brand);
-  border-radius: 0 var(--radius) var(--radius) 0;
-  padding: 20px 24px; margin: 30px 0;
-}
-.quote-block p {
-  font-size: 0.95rem; color: var(--muted); line-height: 1.7; font-style: italic;
-}
-.quote-block .attribution {
-  font-style: normal; font-size: 0.8rem; color: var(--dim); margin-top: 10px;
-}
-
-/* CTA */
-.cta {
-  text-align: center; padding: 40px 20px 30px;
-  max-width: 600px; margin: 0 auto;
-}
-.cta h2 { font-size: 1.3rem; font-weight: 800; margin-bottom: 8px; }
-.cta p { color: var(--muted); font-size: 0.9rem; margin-bottom: 24px; }
-
-/* Footer */
-.footer {
-  text-align: center; padding: 20px; font-size: 0.75rem; color: var(--dim);
-  border-top: 1px solid var(--border); max-width: 600px; margin: 0 auto;
-}
-.footer a { color: var(--brand); text-decoration: none; font-weight: 600; }
-
-/* Code snippet */
-.code-block {
-  background: var(--bg-dark); border: 1px solid var(--border); border-radius: 10px;
-  padding: 16px; margin: 16px 0; overflow-x: auto;
-}
-.code-block code {
-  font-family: var(--mono); font-size: 0.78rem; color: var(--muted); line-height: 1.8;
-}
-.code-block .keyword { color: var(--brand); }
-.code-block .string { color: var(--green); }
-.code-block .comment { color: var(--dim); }
-
-@keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-@keyframes shimmer { 0%, 100% { background-position: 0% center; } 50% { background-position: 200% center; } }
-
-@media (max-width: 400px) {
-  .hero h1 { font-size: 1.7rem; }
-  .hero-actions { flex-direction: column; }
-  .btn { width: 100%; justify-content: center; }
-  .use-cases { grid-template-columns: 1fr; }
-}
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity var(--transition); z-index: 200; }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    .modal-sheet { width: 100%; max-width: 430px; background: var(--bg-tertiary); border-radius: 20px 20px 0 0; padding: 20px; transform: translateY(100%); transition: transform 0.3s ease; }
+    .modal-overlay.active .modal-sheet { transform: translateY(0); }
+    .modal-handle { width: 36px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; margin: 0 auto 16px; }
+    .modal-term { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+    .modal-type { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--i-button); margin-bottom: 12px; }
+    .modal-content { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+    .modal-close { margin-top: 20px; width: 100%; padding: 12px; background: rgba(255,255,255,0.08); border: none; border-radius: 10px; color: var(--text-primary); font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
 </style>
+```
+
 </head>
 <body>
-<div class="page">
-
-  <div class="hero">
-    <div class="hero-badge"><span class="dot"></span> Open Source · Zero Dependencies</div>
-    <h1>Stop losing leads to <em>"call for a quote"</em></h1>
-    <p>Interactive quote widgets that let customers choose options, understand pricing, and submit structured enquiries — all from their phone at 9pm on a Tuesday.</p>
-    <div class="hero-actions">
-      <a href="examples/fencing.html" class="btn btn-primary">⚡ Try the Demo</a>
-      <a href="https://github.com/boilermaker-innovator/itabs-quotes" class="btn btn-secondary">GitHub Repo →</a>
+<div class="container">
+    <div class="progress-container" id="progress"></div>
+    <div class="cards-wrapper" id="cardsWrapper"></div>
+    <div class="nav-area">
+        <button class="nav-btn" id="prevBtn" onclick="navigate(-1)">←</button>
+        <span class="card-counter" id="counter">1 / 11</span>
+        <button class="nav-btn" id="nextBtn" onclick="navigate(1)">→</button>
     </div>
-  </div>
-
-  <div class="section">
-    <div class="section-label">How It Works</div>
-    <h2>One JSON config → full interactive widget</h2>
-    <div class="flow">
-      <div class="flow-step">
-        <div class="flow-icon">🎯</div>
-        <div class="flow-text">
-          <h3>Customer chooses options</h3>
-          <p>Materials, styles, access conditions — tappable cards, not dropdown menus</p>
-        </div>
-      </div>
-      <div class="flow-step">
-        <div class="flow-icon">📏</div>
-        <div class="flow-text">
-          <h3>Sets dimensions with sliders</h3>
-          <p>Length, height, quantity — drag to set, see the price move in real time</p>
-        </div>
-      </div>
-      <div class="flow-step">
-        <div class="flow-icon">💡</div>
-        <div class="flow-text">
-          <h3>Learns through the "i" button</h3>
-          <p>Why colorbond costs more. Why slopes add cost. Contextual education, not walls of text</p>
-        </div>
-      </div>
-      <div class="flow-step">
-        <div class="flow-icon">💰</div>
-        <div class="flow-text">
-          <h3>Gets a live estimate</h3>
-          <p>Ballpark range updates as they go — no more "how much roughly?"</p>
-        </div>
-      </div>
-      <div class="flow-step">
-        <div class="flow-icon">📬</div>
-        <div class="flow-text">
-          <h3>Submits a structured enquiry</h3>
-          <p>Every spec attached. Ready to quote — not "hi I need a fence how much?"</p>
-        </div>
-      </div>
-      <div class="flow-step">
-        <div class="flow-icon">⚡</div>
-        <div class="flow-text">
-          <h3>Tradie quotes in minutes, not days</h3>
-          <p>No back-and-forth. No phone tag. Decision happens on the spot</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-label">Get Started</div>
-    <h2>Three ways to build a widget</h2>
-    <div class="paths">
-      <a href="builder/builder.html" class="path-card">
-        <div class="path-top">
-          <div class="path-icon">🖥️</div>
-          <div class="path-title">Config Builder</div>
-        </div>
-        <p>Visual form — fill in the fields, export a working widget. Gemini AI can pre-fill everything from a business URL.</p>
-        <span class="path-tag">NO CODE NEEDED</span>
-      </a>
-      <a href="https://github.com/boilermaker-innovator/itabs-quotes/blob/main/skills/SKILL.md" class="path-card">
-        <div class="path-top">
-          <div class="path-icon">🤖</div>
-          <div class="path-title">AI Builds It</div>
-        </div>
-        <p>Paste the SKILL.md into Claude or ChatGPT. Say "build me a config for a Perth concreting company." Done.</p>
-        <span class="path-tag">FASTEST</span>
-      </a>
-      <a href="https://github.com/boilermaker-innovator/itabs-quotes/tree/main/configs" class="path-card">
-        <div class="path-top">
-          <div class="path-icon">📋</div>
-          <div class="path-title">Copy & Modify</div>
-        </div>
-        <p>Grab an existing config from the repo, swap in your trade-specific options, adjust the pricing. Ship it.</p>
-        <span class="path-tag">FOR DEVELOPERS</span>
-      </a>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-label">Beyond Quoting</div>
-    <h2>Any decision that stalls from missing info</h2>
-    <div class="use-cases">
-      <div class="use-case"><div class="uc-icon">🔨</div><div class="uc-name">Trade Quotes</div><div class="uc-desc">Fencing, concreting, painting</div></div>
-      <div class="use-case"><div class="uc-icon">📚</div><div class="uc-name">Training</div><div class="uc-desc">White Card, RSA, compliance</div></div>
-      <div class="use-case"><div class="uc-icon">🏠</div><div class="uc-name">Real Estate</div><div class="uc-desc">Property inspection tools</div></div>
-      <div class="use-case"><div class="uc-icon">🛡️</div><div class="uc-name">Insurance</div><div class="uc-desc">Pre-assessment wizards</div></div>
-      <div class="use-case"><div class="uc-icon">🎉</div><div class="uc-name">Events</div><div class="uc-desc">Package configurators</div></div>
-      <div class="use-case"><div class="uc-icon">🚗</div><div class="uc-name">Auto Services</div><div class="uc-desc">Service estimators</div></div>
-    </div>
-    <div class="code-block"><code><span class="comment">// The engine stays the same. The config changes.</span><br><span class="keyword">const</span> WIDGET_CONFIG = {<br>&nbsp;&nbsp;steps: [<span class="string">"your trade"</span>, <span class="string">"your options"</span>, <span class="string">"your pricing"</span>],<br>&nbsp;&nbsp;hints: [<span class="string">"your expertise, organised"</span>]<br>};</code></div>
-  </div>
-
-  <div class="section">
-    <div class="quote-block">
-      <p>"The internet should make things cheaper. But trades still charge $100+ just to show up and quote. What if the customer already knew what they wanted, why it costs what it costs, and was ready to commit — before the tradie even picked up the phone?"</p>
-      <div class="attribution">— The question that started iTabs</div>
-    </div>
-  </div>
-
-  <div class="cta">
-    <h2>Organise information. Accelerate decisions.</h2>
-    <p>Open source. Free forever. Built by a boilermaker from Perth with AI.</p>
-    <div class="hero-actions">
-      <a href="examples/fencing.html" class="btn btn-primary">⚡ Try the Demo</a>
-      <a href="builder/builder.html" class="btn btn-secondary">Open Builder</a>
-    </div>
-  </div>
-
-  <div class="footer">
-    <p>Built by <a href="https://github.com/boilermaker-innovator">Jon</a> · Powered by <a href="https://github.com/boilermaker-innovator/itabs-quotes">iTabs</a></p>
-    <p style="margin-top:6px;">Organise information so decisions happen faster</p>
-  </div>
-
 </div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-term" id="modalTerm"></div>
+        <div class="modal-type" id="modalType"></div>
+        <div class="modal-content" id="modalContent"></div>
+        <button class="modal-close" onclick="closeModal()">Close</button>
+    </div>
+</div>
+
+<script>
+const cards = [
+    {
+        tag: "01 / INTRO",
+        tagClass: "",
+        headline: "AI Can't Find What It <em>Doesn't Know</em> It Has",
+        heroClass: "hero-default",
+        summary: "The presenter had a massive eBook library — hundreds of books full of insights. The problem? Keyword search found books on topics but couldn't surface specific ideas buried inside them. Standard AI tools weren't cutting it.",
+        analogy: { title: "Think of it like...", text: "A warehouse full of filing cabinets. You can find the right cabinet, but not the specific note inside the folder inside the drawer." },
+        iButtons: [
+            { label: "The goal", type: "why-it-matters", term: "Hidden Knowledge", content: "Most large document collections have incredible depth that's completely inaccessible. The goal of this project was to unlock cross-book insights — finding what multiple authors say about the same topic, not just which book covers that topic." }
+        ]
+    },
+    {
+        tag: "02 / BASICS",
+        tagClass: "tag-purple",
+        headline: "RAG Is Your AI's <em>Filing Cabinet</em>",
+        heroClass: "hero-purple",
+        summary: "RAG stands for Retrieval-Augmented Generation. Instead of relying on an AI's memory alone, you give it a filing cabinet of your own documents to search before answering. The AI finds relevant chunks, then uses them as context to generate a grounded answer.",
+        analogy: { title: "The pipeline:", text: "Documents → split into chunks → convert to vectors → store in database. At query time: search for similar chunks → feed them to the LLM → get a grounded answer." },
+        iButtons: [
+            { label: "What is RAG", type: "definition", term: "RAG", content: "Retrieval-Augmented Generation. A technique where an AI searches a database of your documents before generating a response, so the answer is grounded in real content rather than general training data." },
+            { label: "Why not just ChatGPT", type: "why-it-matters", term: "Why RAG", content: "General AI models don't know your specific documents. RAG lets you point the AI at your own content — manuals, books, past quotes, safety docs — so it answers from your data, not guesswork." }
+        ]
+    },
+    {
+        tag: "03 / CONCEPTS",
+        tagClass: "tag-purple",
+        headline: "Three Words You Need: <em>Chunks, Embeddings, Vectors</em>",
+        heroClass: "hero-purple",
+        summary: "Before AI can search your documents, they need to be prepared. Documents get broken into chunks (small pieces of text). Each chunk gets converted into an embedding (a numerical fingerprint). That fingerprint is stored as a vector — a list of numbers that captures meaning.",
+        analogy: { title: "Think of it like...", text: "'King' − 'Man' + 'Woman' = 'Queen' in vector space. Words with similar meanings end up close together as numbers. That's how AI finds related content." },
+        iButtons: [
+            { label: "Chunks", type: "definition", term: "Chunks", content: "Documents are broken into 500–1000 token pieces, with slight overlap so topics don't get cut in half. Smart chunking uses sentence boundaries so a topic is never split mid-thought." },
+            { label: "Embeddings", type: "definition", term: "Embeddings", content: "Machine learning models (like SentenceTransformers) convert text into a list of numbers — typically 384 dimensions — that captures the semantic meaning. Similar text produces similar numbers." },
+            { label: "Vectors", type: "definition", term: "Vectors", content: "The numerical representation of text, stored in a vector database. When you search, your query also becomes a vector and the database finds chunks with the closest numbers — meaning closest meaning." }
+        ]
+    },
+    {
+        tag: "04 / VISUAL",
+        tagClass: "tag-cyan",
+        headline: "Similar Words <em>Cluster Together</em> in Space",
+        heroClass: "hero-cyan",
+        summary: "Imagine a 3D map where every word or phrase is a dot. 'King', 'Queen', 'Prince', 'Royal' all cluster together. 'Banana' and 'Galaxy' are far away. When you search, AI finds the dots nearest to your query — that's semantic search.",
+        analogy: { title: "Real example from the slides:", text: "The presentation showed 'king', 'queen', 'prince', 'royal' all clustered tightly together, while 'umbrella', 'banana', 'galaxy', 'democracy' scattered far apart. Real embeddings have 384+ dimensions, not just 3." },
+        iButtons: [
+            { label: "Why this beats keywords", type: "why-it-matters", term: "Semantic Search", content: "Keyword search only finds exact matches. Vector search finds meaning. Search for 'affordable vehicle' and it finds results about 'cheap cars' too. This is why AI search feels smarter than Google for specific document questions." }
+        ]
+    },
+    {
+        tag: "05 / MECHANICS",
+        tagClass: "tag-cyan",
+        headline: "How Text <em>Becomes Numbers</em>: Tokenisation",
+        heroClass: "hero-cyan",
+        summary: "Before text becomes a vector, it gets broken into tokens — sub-word pieces. 'Happiness' becomes 'happi' + 'ness'. This means AI only needs 50K tokens to cover millions of words, and can handle words it's never seen before by breaking them into familiar parts.",
+        analogy: { title: "From the slides:", text: "Word tokens (19): [Tokenisers, break, words, into...] vs Subword tokens (27): [Token, isers, break, words, into, sub, word...] — more pieces, but smarter coverage." },
+        iButtons: [
+            { label: "Why subwords", type: "why-it-matters", term: "Subword Tokenisation", content: "Modern LLMs use BPE (Byte Pair Encoding), WordPiece, or Unigram tokenisation. It balances vocabulary size vs coverage. A word like 'unhallucinationable' can be broken into known parts even if the model never saw that word in training." }
+        ]
+    },
+    {
+        tag: "06 / SELF-ATTENTION",
+        tagClass: "tag-purple",
+        headline: "Words Look at Each Other to <em>Understand Context</em>",
+        heroClass: "hero-purple",
+        summary: "Self-attention is the core idea inside transformer models. Every word 'looks at' every other word to understand its meaning in context. Without it, 'brown' in 'the quick brown fox' is just a colour. With self-attention, 'brown' knows it's describing a fox.",
+        analogy: { title: "The key insight:", text: "With self-attention: 'brown' looks at 'The' (weak), 'quick' (weak), 'fox' (strong). Now 'brown' knows: I'm describing the fox. This is what lets embeddings capture true meaning, not just word identity." },
+        iButtons: [
+            { label: "Self-Attention", type: "definition", term: "Self-Attention", content: "A mechanism where each word in a sequence attends to every other word, building a context-aware representation. It's the reason transformers (like the models behind ChatGPT and Claude) understand meaning instead of just matching words." }
+        ]
+    },
+    {
+        tag: "07 / ARCHITECTURE",
+        tagClass: "tag-amber",
+        headline: "Two Paths Are Better Than <em>One</em>",
+        heroClass: "hero-amber",
+        summary: "The 'hybrid' in Hybrid RAG means running two parallel search systems. The Vector Path handles semantic search — finding similar text. The Graph Path handles structure — understanding how concepts connect. Together they cover what neither can do alone.",
+        analogy: { title: "Why hybrid matters:", text: "Vector search finds similar text. Graph search understands how things are connected. 'Dependency A requires Tool B' is a relationship — vectors miss that. Graphs catch it." },
+        iButtons: [
+            { label: "Vector Path", type: "definition", term: "Vector Path", content: "Documents chunked at 3,500 chars, embedded with Sentence Transformers, stored in ChromaDB. Great for fuzzy semantic search — finding content that means something similar to your query." },
+            { label: "Graph Path", type: "definition", term: "Graph Path", content: "Entities and concepts extracted from documents, relationships mapped between them, stored in Neo4j graph database. Great for structured questions like 'what depends on what' or 'how are these things connected'." }
+        ]
+    },
+    {
+        tag: "08 / CHROMADB",
+        tagClass: "tag-cyan",
+        headline: "ChromaDB: Your <em>Vector Search</em> Engine",
+        heroClass: "hero-cyan",
+        summary: "ChromaDB is the database that stores and searches all those number-fingerprints (vectors). It uses HNSW indexing for lightning-fast approximate search across millions of vectors, and cosine similarity to rank results by how close their meaning is to your query.",
+        analogy: null,
+        iButtons: [
+            { label: "HNSW", type: "definition", term: "HNSW Indexing", content: "Hierarchical Navigable Small World — a graph-based index for fast approximate nearest neighbour search. It builds multi-layer graph structures with a 'skip list' approach, achieving logarithmic O(log n) search time. The trade-off: speed vs perfect accuracy." },
+            { label: "Cosine similarity", type: "definition", term: "Cosine Similarity", content: "The maths used to compare two vectors. It measures the angle between them in multi-dimensional space. A score of 1.0 means identical meaning, 0 means completely unrelated. ChromaDB uses this to rank search results." }
+        ]
+    },
+    {
+        tag: "09 / NEO4J",
+        tagClass: "tag-purple",
+        headline: "Neo4j: Where <em>Relationships</em> Live",
+        heroClass: "hero-purple",
+        summary: "Neo4j is a graph database — it stores not just facts but how facts connect. A document MENTIONS a concept. A concept IS_A type of thing. 'FastAPI' USED_FOR 'REST API'. Every relationship has a confidence score from 0.0 to 1.0 based on extraction strength.",
+        analogy: { title: "Graph Schema from the slides:", text: "(:Document)-[:MENTIONS]->(:Concept) | (:Document)-[:CLASSIFIED_AS]->(:Category) | (:Concept)-[:RELATED_TO]->(:Concept)" },
+        iButtons: [
+            { label: "Graph vs Vector", type: "context", term: "Graph Database", content: "Vector databases find similar content. Graph databases find connected content. If you ask 'what tools are used for REST APIs', a graph can traverse relationships to find the answer — vectors would just find text that mentions REST APIs nearby." },
+            { label: "Deduplication", type: "definition", term: "Deduplication", content: "Concepts merge on normalised names across documents. If Book A and Book B both mention 'machine learning', they link to the same concept node — not two separate ones. This creates a unified knowledge graph across your entire library." }
+        ]
+    },
+    {
+        tag: "10 / THE PROBLEM",
+        tagClass: "tag-red",
+        headline: "The Hardest Part: <em>Extracting Relationships</em>",
+        heroClass: "hero-red",
+        summary: "Old NLP just noticed when two words appeared near each other and called them 'related'. That gives you generic RELATED_TO edges everywhere — useless. LLMs can actually infer the type of relationship: IS_A, USED_FOR, HAS_PART, IMPLEMENTS. That's the real breakthrough.",
+        analogy: { title: "The current challenge:", text: "The pipeline extracts relationships 'blindly' — sending a list of concepts to the LLM without the source text. The future fix: LLM needs both the source text AND the concepts to accurately determine why they're related." },
+        iButtons: [
+            { label: "NLP failure mode", type: "context", term: "NLP Co-occurrence", content: "Traditional NLP relies on co-occurrence statistics: if 'Python' and 'Slow' appear in the same sentence, it creates a relationship. The result is generic edges that tell you proximity, not causality. Not useful for real knowledge graphs." },
+            { label: "LLM solution", type: "why-it-matters", term: "Semantic Relationship Extraction", content: "LLMs infer semantic relationship types from context. 'FastAPI USED_FOR REST API' and 'ChromaDB IS_A vector database' are meaningful, typed relationships. This turns a word list into a real knowledge network." }
+        ]
+    },
+    {
+        tag: "11 / TAKEAWAY",
+        tagClass: "tag-green",
+        headline: "Build From Scratch to <em>Understand the Why</em>",
+        heroClass: "hero-green",
+        summary: "The key insight from the presenter: building this from scratch instead of using off-the-shelf RAG revealed why every design choice exists. The chunking strategy, the dual-path architecture, the relationship extraction — each solved a real problem he discovered by building it himself.",
+        analogy: { title: "Relevant for iTabs?", text: "Any tradie with a library of manuals, past quotes, or safety docs could use this kind of system to answer job-specific questions from their own data. Not someday — the building blocks are all open source." },
+        iButtons: [
+            { label: "Full system stack", type: "context", term: "NexusRAG Stack", content: "Input: PDF/EPUB/MD via drag-drop UI or CLI. Processing: semantic chunking (NLTK), classification (18 cats, 800+ keywords), LLM concept extraction, async job manager. Storage: ChromaDB (vectors), Neo4j (graph), SQLite (job persistence). Retrieval: semantic search, graph traversal, agentic multi-step search. Access: REST API, Web UI, MCP Server." },
+            { label: "What to explore next", type: "related", term: "Next Steps", content: "If this interests you: start with ChromaDB and sentence-transformers (both free and local). Build a simple vector search over your own documents. Once that clicks, add Neo4j for relationships. The presenter's code is at github.com/andyspamer/nexusrag." }
+        ]
+    }
+];
+
+let currentCard = 0;
+const totalCards = cards.length;
+const modalOverlay = document.getElementById('modalOverlay');
+const modalTerm = document.getElementById('modalTerm');
+const modalType = document.getElementById('modalType');
+const modalContent = document.getElementById('modalContent');
+
+function init() {
+    const progress = document.getElementById('progress');
+    const wrapper = document.getElementById('cardsWrapper');
+    cards.forEach((card, i) => {
+        const seg = document.createElement('div');
+        seg.className = 'progress-segment' + (i === 0 ? ' active' : '');
+        progress.appendChild(seg);
+        wrapper.appendChild(buildCard(card, i));
+    });
+    document.getElementById('counter').textContent = `1 / ${totalCards}`;
+    document.getElementById('prevBtn').disabled = true;
+    document.addEventListener('keydown', e => {
+        if (e.key === 'ArrowRight') navigate(1);
+        if (e.key === 'ArrowLeft') navigate(-1);
+        if (e.key === 'Escape') closeModal();
+    });
+    let startX = 0;
+    const cw = document.getElementById('cardsWrapper');
+    cw.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+    cw.addEventListener('touchend', e => {
+        const diff = startX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 50) navigate(diff > 0 ? 1 : -1);
+    });
+}
+
+function buildCard(card, index) {
+    const el = document.createElement('div');
+    el.className = 'card' + (index === 0 ? ' active' : '');
+    const analogyHTML = card.analogy ? `<div class="analogy-box"><div class="analogy-title">${card.analogy.title}</div><div class="analogy-text">${card.analogy.text}</div></div>` : '';
+    const iButtonsHTML = card.iButtons.length ? `<div class="i-buttons">${card.iButtons.map(b => `<button class="i-button" data-term="${b.term}" data-type="${b.type}" data-content="${encodeURIComponent(b.content)}"><span class="i-dot">i</span>${b.label}</button>`).join('')}</div>` : '';
+    el.innerHTML = `
+        <div class="card-hero ${card.heroClass}">
+            <div class="card-tag ${card.tagClass}">${card.tag}</div>
+            <h2 class="card-headline">${card.headline}</h2>
+        </div>
+        <div class="card-body">
+            <p class="card-summary">${card.summary}</p>
+            ${analogyHTML}
+            ${iButtonsHTML}
+        </div>`;
+    el.querySelectorAll('.i-button').forEach(btn => {
+        btn.addEventListener('click', e => {
+            e.stopPropagation();
+            openModal(btn.dataset.term, btn.dataset.type, decodeURIComponent(btn.dataset.content));
+        });
+    });
+    return el;
+}
+
+function navigate(direction) {
+    const next = currentCard + direction;
+    if (next >= 0 && next < totalCards) updateCard(next);
+}
+
+function updateCard(index) {
+    document.querySelectorAll('.card').forEach((c, i) => {
+        c.classList.remove('active', 'prev');
+        if (i === index) c.classList.add('active');
+        else if (i < index) c.classList.add('prev');
+    });
+    document.querySelectorAll('.progress-segment').forEach((s, i) => {
+        s.classList.remove('active', 'viewed');
+        if (i === index) s.classList.add('active');
+        else if (i < index) s.classList.add('viewed');
+    });
+    currentCard = index;
+    document.getElementById('counter').textContent = `${index + 1} / ${totalCards}`;
+    document.getElementById('prevBtn').disabled = index === 0;
+    document.getElementById('nextBtn').disabled = index === totalCards - 1;
+}
+
+function openModal(term, type, content) {
+    const typeLabels = { 'definition': 'Definition', 'context': 'Context', 'why-it-matters': 'Why It Matters', 'related': 'Related' };
+    modalTerm.textContent = term;
+    modalType.textContent = typeLabels[type] || type;
+    modalContent.textContent = content;
+    modalOverlay.classList.add('active');
+}
+
+function closeModal() { modalOverlay.classList.remove('active'); }
+
+init();
+</script>
+
 </body>
 </html>
